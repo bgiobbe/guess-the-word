@@ -45,10 +45,6 @@ h1 {
   width: 90%;
 }
 
-.hide {
-  display: none;
-}
-
 .highlight {
   padding: 0.25em;
   background: #ffe2d6;
@@ -84,6 +80,10 @@ h1 {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.hide {
+  display: none;
 }
 
 .guess-form label {
@@ -134,7 +134,7 @@ input:focus {
   color: white;
 }
 
-/* animatied background */
+/* animated background */
 .win {
   padding: 0 1em;
   background: linear-gradient(-45deg, #ff9d64, #f5620c);
