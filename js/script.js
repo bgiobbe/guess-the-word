@@ -122,6 +122,7 @@ const handleGuess = function (guess) {
     // update remaining guesses on screen
     if (remainingGuesses === 0) {
         message.innerText = `Game over -- the word was "${word}".`;
+        startOver();
     } else if (remainingGuesses === 1) {
         remainingSpan.innerText = "1 guess";
     } else {
@@ -133,5 +134,31 @@ const checkIfWon = function (secretWord, guessedWord) {
     if (secretWord === guessedWord) {
         message.classList.add("win");
         message.innerHTML = '<p class="highlight">You guessed the correct word! Congrats!</p>';
+        startOver();
     }
 };
+
+const startOver = function () {
+    // hide game elements
+    guessButton.classList.add("hide");
+    remaining.classList.add("hide");
+    guessedList.classList.add("hide");
+    // show Play Again button
+    playAgainButton.classList.remove("hide");
+};
+
+playAgainButton.addEventListener("click", function () {
+    // reset data and display
+    message.classList.remove("win");
+    message.innerText = "";
+    guessedLetters = [];
+    guessedList.innerHTML = "";
+    guessedList.classList.remove("hide");
+    remainingGuesses = MAX_GUESSES;
+    remainingSpan.innerText = `${remainingGuesses} guesses`;
+    remaining.classList.remove("hide");
+    playAgainButton.classList.add("hide");
+    guessButton.classList.remove("hide");
+    // start new game
+    getWord();
+});
