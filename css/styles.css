@@ -1,4 +1,4 @@
-* {
+u* {
   box-sizing: border-box;
 }
 
@@ -11,11 +11,11 @@ body {
   font-style: normal;
   font-size: 20px;
   line-height: 150%;
-  background-color: #dff6f6;
+  background-color: blue;
   background-image: url("../img/bg.png");
   background-size: 800px;
   background-repeat: repeat;
-  color: #305050;
+  color: antiquewhite;
 }
 
 .logo {
@@ -36,18 +36,19 @@ h1 {
 
 .container {
   background: radial-gradient(50% 50% at 50% 50%,
-    rgba(167, 237, 237, 0.3) 0%,
-    rgba(156, 226, 226, 0) 100%);
+    rgba(25, 25, 112, 0.9) 0%,
+    rgba(56, 70, 247, 0.3) 100%);
   display: flex;
   justify-content: center;
   flex-direction: column;
   align-items: center;
   width: 90%;
+  padding-bottom: 40px;
 }
 
 .highlight {
   padding: 0.25em;
-  background: #ffe2d6;
+  background: #2e2ed1;
   font-size: 1em;
 }
 
@@ -58,7 +59,7 @@ h1 {
 
 .word-in-progress {
   letter-spacing: 15px;
-  color: #28bdbd;
+  color: #28a428;
   font-size: 30px;
 }
 
@@ -99,13 +100,15 @@ input {
   font-size: 1.5em;
   margin-top: 0.5em;
   padding: 0.5em;
-  border: 3px solid #28bdbd;
+  border: 3px solid forestgreen;
+  background-color: antiquewhite;
+  color: #121254;
 }
 
 input:active,
 input:focus {
   outline: 0;
-  border: 4px solid #28bdbd;
+  border: 3px solid #28a428;
 }
 
 .guess,
@@ -114,12 +117,16 @@ input:focus {
   border-radius: 50px;
   margin-top: 1em;
   color: #fff;
-  background: #ff8d5c;
+  background: forestgreen;
   font-size: 1em;
   align-self: center;
   outline: none;
   border: 0;
   cursor: pointer;
+}
+
+.play-again {
+    margin-top: 3em;
 }
 
 .guess:active,
@@ -137,7 +144,7 @@ input:focus {
 /* animated background */
 .win {
   padding: 0 1em;
-  background: linear-gradient(-45deg, #ff9d64, #f5620c);
+  background: linear-gradient(-45deg, #6600cc, #6600ff);
   background-size: 400% 400%;
   animation: gradient 2s ease infinite;
 }
