@@ -1,201 +1,204 @@
-// Game parameters
+// Game setings
 const MAX_GUESSES = 8;
 
 // Page elements
 const message = document.querySelector("p.message");
 const wordInProgress = document.querySelector("p.word-in-progress");
-const remaining = document.querySelector(".remaining span");
+const gamePlayDiv = document.querySelector("#playing");
+const remainingP = document.querySelector(".remaining");
+const remainingSpan = document.querySelector(".remaining span");
 const guessedLetters = document.querySelector("ul.guessed-letters");
-const guessFormDiv = document.querySelector(".form-div");
 const letterInput = document.querySelector(".letter");
 const guessButton = document.querySelector("button.guess");
 const playAgainButton = document.querySelector("button.play-again");
 
 // Game data
 const game = {
-    secretWord: "magnolia",
-    guessesRemaining: 8,
-    guessedLetters: "",
-    gameOver: true,
-    win: false
+    wordList: getWords(),
+    word: null,
+    guessesRemaining: null,
+    guessedLetters: null
 };
 
-// Event listeners
+// Fetch a list of words from a file
+async function getWords() {
+    const response = await fetch(
+        "https://gist.githubusercontent.com/skillcrush-curriculum/7061f1d4d3d5bfe47efbfbcfe42bf57e/raw/5ffc447694486e7dea686f34a6c085ae371b43fe/words.txt"
+    );
+    const content = await response.text();
+    game.wordList = content.split("\n");
+
+    // don't start game until word list has been received
+    startGame();
+}
+
+// Guess button click
 guessButton.addEventListener("click", function (e) {
     // Prevent page from reloading when Guess button is clicked
     // Game won't work without this!
     e.preventDefault();
-    guess();
-});
-document.addEventListener("keypress", function (e) {
-    // When game is running, Enter key acts like Guess button click
-    if (e && e.key == "Enter" && !game.gameOver) {
-        guess();
+
+    const guess = validatedInput();
+    if (guess) {
+        makeGuess(guess);
     }
 });
-playAgainButton.addEventListener("click", function () {
-    startGame();
-});
 
+/*
+ * Get a letter from input, validate it, return it as uppercase.
+ * If input is invalid, set message appropriately.
+ * Clear the letter input.
+ */
+function validatedInput() {
+    const oneLetter = /[a-zA-Z]/;
 
-// Start a new game
-const startGame = function () {
-    console.debug("startGame");
-
-    // initialize game data
-    game.secretWord = selectAWord().toUpperCase();
-    guessesRemaining(MAX_GUESSES);
-    clearGuessedLetters();
-    game.gameOver = false;
-    game.win = false;
-
-    // initialize the display
+    const input = letterInput.value;
     letterInput.value = "";
-    displayWordInProgress();
-    hidePlayAgain();
-   
-    /* The game is driven by the Guess button hereafter */
-};
 
-// Guess button event handler
-const guess = function () {
-    // Get new letter from the input
-    let newLetter = letterInput.value;
-    //console.debug("guess:", `${newLetter}`);
-    
-    // validate
-    if (newLetter.length === 0) {
-        console.debug("guess", "no input");
-        ;// ignore it - I think I'm getting extra button click events
-    } else if (newLetter.length > 1) {
-        console.debug("guess", "more than one character");
-        message.innerText = "Please enter only one letter"; 
-    } else if  (newLetter.match(/[A-Za-z]/) === null) {
-        console.debug("guess", "not a letter");
-        message.innerText = "That's not a letter!"; 
+    if (input.length === 0) {
+        message.innerText = "Please enter a letter";
+    }
+    else if (input.length > 1) {
+        message.innerText = "Please enter only one letter at a time.";
+    }
+    else if (input.match(oneLetter) === null) {
+        message.innerText = "Please enter a letter from A-Z.";
+    }
+    else {
+        return input.toUpperCase();
+    }
+}
+
+// Test a single letter
+function makeGuess(letter) {
+    if (game.guessedLetters.includes(letter)) {
+        message.innerText = "You already tried that letter!";
     } else {
-        // Valid letter - uppercase it before continuing
-        newLetter = newLetter.toUpperCase();
+        // valid guess
+        addGuessedLetter(letter);
 
-        if (game.guessedLetters.includes(newLetter)) {
-            console.debug("guess", "reused letter");
-            message.innerText = "You already tried that letter!";
+        if (game.word.includes(letter)) {
+            message.innerText = `Good guess! The word has the letter ${letter}.`;
         } else {
-            // valid guess -- handle it
-            console.debug("guess", "valid input");
-            message.innerText = "";
-            addGuessedLetter(newLetter);
+            message.innerText = `The word does not have the letter ${letter}.`;
             guessesRemaining(-1);
-            displayWordInProgress();    
-        
-            if (game.gameOver) {
-                endGame();
-            }
         }
+        
+        updateWordInProgress();
     }
-    // clear the input
-    letterInput.value = "";
-};
+    clearLetterInput()
+}
 
-const selectAWord = function () {
-    return "secret";
-    // TODO Get random word from an API
-};
+// Add guessed letter to game object and display
+function addGuessedLetter(letter) {
+    game.guessedLetters += letter;
+
+    const li = document.createElement("li");
+    li.innerText = letter;
+    guessedLetters.append(li);
+}
 
 /* guessesRemaining()
- *  numGuesses:  if -1, decrement guesses remaining
- *               otherwise, set guesses remaining
- */
-const guessesRemaining = function (numGuesses) {
+    *  numGuesses:  if -1, decrement guesses remaining
+    *               otherwise, set guesses remaining
+    */
+function guessesRemaining(numGuesses) {
     if (numGuesses === -1) {
         game.guessesRemaining--;
     } else {
         game.guessesRemaining = numGuesses;
     }
-    // update display
-    remaining.innerText = `${game.guessesRemaining} guesses `;
 
-    // if no guesses remain, the game is over
+    // update display and check for game over
     if (game.guessesRemaining === 0) {
-        game.gameOver = true;
+        message.innerText = `Game over -- the word was "${game.word}".`;
+        gameOver();
+    } else if (game.guessesRemaining === 1) {
+        remainingSpan.innerText = "1 guess";
+    } else {
+        remainingSpan.innerText = `${game.guessesRemaining} guesses`;
     }
-};
-
-// Clear guessed letters in game object and display
-const clearGuessedLetters = function () {
-    game.guessedLetters = "";
-    guessedLetters.innerHTML = "";
-};
-
-  // Add guessed letter to game object and display
-const addGuessedLetter = function (letter) {
-    const li = document.createElement("li");
-    li.innerText = letter;
-    guessedLetters.append(li);
-
-    game.guessedLetters += letter;
-};
+}
 
 // Update word-in-progress display and test for win
-const displayWordInProgress = function () {
-    console.debug("displayWordInProgress");
+function updateWordInProgress() {
     const UNGUESSED = "●";
-    const letters = game.secretWord.split("");
-    //console.debug("updateWIP", letters);
-    
+    const word = game.word.split("");
+
     // Create display concealing unguessed letters
-    let displayWord = letters.map(function (letter) {
+    let displayWord = word.map(function (letter) {
         return (game.guessedLetters.includes(letter)) ? letter : UNGUESSED;
     });
     displayWord = displayWord.join("");
 
     // update the display
     wordInProgress.innerText = displayWord;
-    
-    // if all letters have been guessed, the player wins and the game is over
-    if (displayWord === game.secretWord) {
-        game.win = true;
-        game.gameOver = true;
-    }
-};
 
-// Make Enter key act like Guess button clicked
-const handleKeyPress = function (e) {
-    if (e && e.key == "Enter") {
-        guess();
-    }
-};
+    checkForWin(displayWord);
+}
 
-// Show Play Again button and hide guess form
-const showPlayAgain = function () {
-    console.debug("showPlayAgain");
-    if (!guessFormDiv.classList.contains("hide")) {
-        guessFormDiv.classList.add("hide");
+// If all letters have been guessed, the player wins and the game is over
+function checkForWin(guessedWord) {
+    if (guessedWord === game.word) {
+        message.classList.add("win");
+        message.innerHTML = '<p class="highlight">You guessed the correct word! Congrats!</p>';
+        gameOver();
     }
+}
+
+// Hide game play elements and show Play Again button
+function gameOver() {
+    // hide game elements
+    gamePlayDiv.classList.add("hide");
+
+    // show Play Again button
     playAgainButton.classList.remove("hide");
-};
+}
 
-// Hide Play Again button and show guess form
-const hidePlayAgain = function () {
-    console.debug("hidePlayAgain");
-    guessFormDiv.classList.remove("hide");
+// Play Again button click
+playAgainButton.addEventListener("click", function () {
+    startGame();
+});
+
+// Start a new game
+function startGame() {
+    // initialize game data and display
+    selectWord();
+    clearLetterInput();
+    guessesRemaining(MAX_GUESSES);
+    clearGuessedLetters();
+    updateWordInProgress();
+    
+    showGame();
+    /* The game is driven by the Guess button hereafter */
+}
+
+// Select a random word, then remove it from the word list.
+function selectWord() {
+    const index = Math.floor(Math.random() * game.wordList.length);
+    game.word = game.wordList[index].trim().toUpperCase();
+    game.wordList.splice(index, 1);
+}
+
+// Clear guessed letters in game object and display
+function clearGuessedLetters() {
+    game.guessedLetters = "";
+    guessedLetters.innerHTML = "";
+}
+
+// Clear the letter input
+function clearLetterInput() {
+    letterInput.value = "";
+}
+
+// Hide the Play Again button, clear message, and show game controls
+function showGame() {
     if (!playAgainButton.classList.contains("hide")) {
         playAgainButton.classList.add("hide");
-    };
-};
-
-// Handle end-of-game
-const endGame = function () {
-    console.debug("endGame");
-
-    if (game.win) {
-        message.innerText = "You win! Good job!";
-    } else {
-        message.innerText = `You ran out of guesses. The word is "${game.secretWord}".`;
     }
-
-    showPlayAgain();
-};
-
-
-startGame();
+    message.innerHTML = ""
+    if (message.classList.contains('win')) {
+        message.classList.remove('win');
+    }
+    gamePlayDiv.classList.remove("hide");
+}
