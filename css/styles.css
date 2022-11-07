@@ -167,6 +167,10 @@ input:focus {
 /* for tablets and larger move the Play Again button down */
 @media only screen and (min-width: 768px) {
 
+    .remaining {
+        font-size: 20px;
+    }
+
     .play-again {
         margin-top: 3em;
     }
