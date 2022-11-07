@@ -114,9 +114,9 @@ function guessesRemaining(numGuesses) {
         message.innerText = `Game over -- the word was "${game.word}".`;
         gameOver();
     } else if (game.guessesRemaining === 1) {
-        remainingSpan.innerText = "1 guess";
+        remainingSpan.innerText = "1 wrong guess";
     } else {
-        remainingSpan.innerText = `${game.guessesRemaining} guesses`;
+        remainingSpan.innerText = `${game.guessesRemaining} wrong guesses`;
     }
 }
 
