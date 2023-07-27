@@ -27,6 +27,7 @@ async function getWords() {
     );
     const content = await response.text();
     game.wordList = content.split("\n");
+    console.log(`Loaded ${game.wordList.length} words`);
 
     // don't start game until word list has been received
     startGame();
@@ -141,7 +142,7 @@ function updateWordInProgress() {
 function checkForWin(guessedWord) {
     if (guessedWord === game.word) {
         message.classList.add("win");
-        message.innerHTML = '<p class="highlight">You guessed the correct word! Congrats!</p>';
+        message.innerHTML = '<p class="highlight">You guessed the correct word!</p>';
         gameOver();
     }
 }
